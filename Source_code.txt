@@ -1,0 +1,231 @@
+ 
+CREATE DATABASE doctor_appointment_db; 
+USE doctor_appointment_db; 
+ 
+ 
+CREATE TABLE doctors (
+    doctor_id INT AUTO_INCREMENT PRIMARY KEY,
+    doctor_name VARCHAR(100) NOT NULL,
+    specialization VARCHAR(100) NOT NULL,
+    phone VARCHAR(15) UNIQUE NOT NULL,
+    email VARCHAR(100) UNIQUE,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+); 
+ 
+
+CREATE TABLE patients (
+    patient_id INT AUTO_INCREMENT PRIMARY KEY,
+    patient_name VARCHAR(100) NOT NULL,
+    phone VARCHAR(15) NOT NULL,
+    email VARCHAR(100),
+    dob DATE,
+    CONSTRAINT uq_patient_contact UNIQUE (phone, email)
+);
+ 
+
+CREATE TABLE doctor_availability (
+    availability_id INT AUTO_INCREMENT PRIMARY KEY,
+    doctor_id INT NOT NULL,
+    available_date DATE NOT NULL,
+    start_time TIME NOT NULL,
+    end_time TIME NOT NULL,
+    max_patients INT NOT NULL,
+
+    CONSTRAINT fk_av_doctor
+        FOREIGN KEY (doctor_id) REFERENCES doctors(doctor_id)
+        ON DELETE CASCADE,
+
+    CONSTRAINT chk_time_valid
+        CHECK (start_time < end_time),
+
+    CONSTRAINT uq_doctor_slot
+        UNIQUE (doctor_id, available_date, start_time, end_time)
+);
+ 
+ 
+CREATE TABLE appointments (
+    appointment_id INT AUTO_INCREMENT PRIMARY KEY,
+    doctor_id INT NOT NULL,
+    patient_id INT NOT NULL,
+    appointment_date DATE NOT NULL,
+    appointment_time TIME NOT NULL,
+    status ENUM('BOOKED', 'CANCELLED', 'COMPLETED') DEFAULT 'BOOKED',
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT fk_app_doctor
+        FOREIGN KEY (doctor_id) REFERENCES doctors(doctor_id),
+
+    CONSTRAINT fk_app_patient
+        FOREIGN KEY (patient_id) REFERENCES patients(patient_id),
+
+    CONSTRAINT uq_doctor_time
+        UNIQUE (doctor_id, appointment_date, appointment_time)
+ 
+ 
+ 
+9.3 DATA INSERTION 
+ 
+ 
+INSERT INTO doctors 
+(doctor_id, doctor_name, specialization, phone, email, joining_date)
+VALUES
+(1, 'Dr. Sudhir Sharma', 'General Physician', '772564895', 'SSharma@gmail.com', '2026-02-07 12:02:02'),
+(2, 'Dr. Roger Dsouza', 'Orthopedic doctor', '9891758265', 'dsouza@gmail.com', '2022-10-01 07:32:00'),
+(3, 'Dr. Sheetal Pal', 'Cardiologist', '713984049', 'SheetalP@gmail.com', '2020-05-15 10:00:00'),
+(4, 'Dr. Rajdev Tiwari', 'General Physician', '98934554129', 'PrajotTiwari@gmail.com', '2020-05-29 07:30:06'),
+(5, 'Dr. Manoj Mhatre', 'General Physician', '7209180857', 'DMhatre@gmail.com', '2018-05-10 07:30:00'),
+(6, 'Surgeon Pankaj Mishra', 'Neuro-Surgeon', '9960854240', 'HM@gmail.com', '2018-11-10 11:48:00'),
+(7, 'Dr. Aman Khan', 'ENT Specialist', '9345678123', 'aman.khan@gmail.com', '2022-08-25 09:00:00'),
+(8, 'Dr. payal jain', 'Gynaecologist', '9699925479', 'Payal2234@gmail.com', '2021-06-12 09:00:00'),
+(9, 'Dr. Anjali Mehta', 'Dermatologist', '9123456789', 'anjali.mehta@gmail.com', '2020-03-20 10:00:00'),
+(10, 'Dr. Sneha Patil', 'General Physician', '9012345678', 'sneha.patil@gmail.com', '2023-01-12 08:15:00'); 
+ 
+ 
+  
+ 
+INSERT INTO patients 
+(patient_id, patient_name, phone, email, age, gender)
+VALUES
+(1, 'Amit Verma', '8888888888', NULL, 21, 'Male'),
+(2, 'Arpit Mishra', '9892795409', 'amishra@gmail.com', 19, 'Male'),
+(3, 'Irfan Maniyar', '9899542639', 'IrfanM@gmail.com', 20, 'Male'),
+(4, 'Kevin Mariam', '7710964279', 'KevM@gmail.com', 19, 'Male'),
+(5, 'Harshit Mishra', '7208780667', 'Harshit2234@gmail.com', 24, 'Male'),
+(6, 'Sudha Prajapati', '8936542511', 'SP@gmail.com', 31, 'Female'),
+(7, 'Anita Shah', '9692145879', 'Anita785@gmail.com', 29, 'Female');
+
+
+
+INSERT INTO doctor_availability
+(availability_id, doctor_id, doctor_name, available_date, start_time, end_time, max_patients)
+VALUES
+(101, 1, 'Dr. Sudhir Sharma', '2026-02-23', '09:00:00', '14:00:00', 8),
+(102, 2, 'Dr. Roger Dsouza', '2026-02-23', '09:00:00', '12:00:00', 10),
+(103, 3, 'Dr. Sheetal Pal', '2026-02-28', '09:00:00', '12:00:00', 10),
+(104, 4, 'Dr. Rajdev Tiwari', '2026-02-23', '09:00:00', '14:00:00', 8),
+(105, 5, 'Dr. Manoj Mhatre', '2026-03-02', '11:00:00', '17:00:00', 10),
+(106, 6, 'Surgeon Pankaj Mishra', '2026-03-04', '07:30:00', '12:00:00', 15),
+(107, 7, 'Dr. Aman Khan', '2026-03-05', '09:00:00', '14:00:00', 10),
+(108, 8, 'Dr. Payal Jain', '2026-03-05', '11:00:00', '19:00:00', 20),
+(109, 9, 'Dr. Anjali Mehta', '2026-03-09', '07:30:00', '13:00:00', 15),
+(110, 10, 'Dr. Sneha Patil', '2026-03-12', '07:30:00', '13:00:00', 15); 
+ 
+ 
+9.4 DATA RETRIEVAL QUERIES 
+ 
+View all doctors 
+ 
+SELECT * FROM doctors; 
+ 
+ 
+ 
+ 
+View all patients 
+ 
+SELECT * FROM patients; 
+ 
+ 
+ 
+ 
+Check available doctors 
+ 
+SELECT * FROM doctor_availability; 
+ 
+9.5 TRANSACTION MANAGEMENT (APPOINTMENT BOOKING) 
+ 
+The BOOKING operation must insert a transaction record and update the Appointments table in a single transaction. 
+ 
+START TRANSACTION; 
+ 
+INSERT INTO appointments
+(doctor_id, patient_id, appointment_date, appointment_time)
+SELECT 
+    1,  -- doctor_id
+    1,  -- patient_id
+    '2026-03-10',
+    '10:00:00'
+FROM doctor_availability da
+WHERE da.doctor_id = 1
+AND da.available_date = '2026-03-10'
+AND '10:00:00' BETWEEN da.start_time AND da.end_time
+AND (
+    SELECT COUNT(*)
+    FROM appointments a
+    WHERE a.doctor_id = 1
+    AND a.appointment_date = '2026-03-10'
+) < da.max_patients; 
+COMMIT; 
+ 
+Explanation: 
+If the doctor is available on the date, the time is in the range of duty and unique and if the slots for the day are left, only then the transaction is committed and changes are saved permanently. 
+ 
+ 
+ 
+ 
+9.6 TRANSACTION MANAGEMENT (UPDATING/CANCELLING APPOINTMENT) 
+Before Updating the Appointment on a next date, the system needs to verify if the doctor is available on the same date. 
+ 
+START TRANSACTION; 
+ 
+UPDATE appointments a
+JOIN doctor_availability da
+ON da.doctor_id = a.doctor_id
+SET 
+    a.appointment_date = '2026-03-10',
+    a.appointment_time = '11:00:00'
+WHERE a.appointment_id = 1
+AND da.available_date = '2026-03-10'
+AND '11:00:00' BETWEEN da.start_time AND da.end_time
+AND (
+    SELECT COUNT(*)
+    FROM appointments
+    WHERE doctor_id = a.doctor_id
+    AND appointment_date = '2026-03-10'
+) < da.max_patients;
+
+FOR CANCELLATION; 
+ 
+UPDATE appointments
+SET status = 'Cancelled'
+WHERE appointment_id = 1;
+ 
+ 
+ 
+9.7 ADVANCED QUERIES 
+ 
+Show Total Appointments by Doctor (GROUP BY + JOIN)  
+ 
+SELECT 
+    d.doctor_name,
+    COUNT(a.appointment_id) AS total_appointments
+FROM doctors d
+LEFT JOIN appointments a 
+    ON d.doctor_id = a.doctor_id
+GROUP BY d.doctor_id
+ORDER BY total_appointments DESC; 
+ 
+ 
+Show Available Slots Per Doctor (SUBQUERY)
+ 
+SELECT 
+    da.doctor_id,
+    da.available_date,
+    da.max_patients - (
+        SELECT COUNT(*)
+        FROM appointments a
+        WHERE a.doctor_id = da.doctor_id
+        AND a.appointment_date = da.available_date
+    ) AS slots_remaining
+FROM doctor_availability da; 
+ 
+9.8 VIEW CREATION 
+ 
+CREATE VIEW doctor_schedule AS
+SELECT 
+    d.doctor_name,
+    a.appointment_date,
+    a.appointment_time,
+    p.patient_name
+FROM appointments a
+JOIN doctors d ON a.doctor_id = d.doctor_id
+JOIN patients p ON a.patient_id = p.patient_id;
