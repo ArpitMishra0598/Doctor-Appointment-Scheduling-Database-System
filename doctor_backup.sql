@@ -1,0 +1,157 @@
+
+
+-- MySQL dump 10.13  Distrib 8.0.45, for Win64 (x86_64)
+--
+-- Host: localhost    Database: doctor_appointment_db
+-- ------------------------------------------------------
+-- Server version	8.0.45
+
+/*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
+/*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
+/*!40101 SET @OLD_COLLATION_CONNECTION=@@COLLATION_CONNECTION */;
+/*!50503 SET NAMES utf8mb4 */;
+/*!40103 SET @OLD_TIME_ZONE=@@TIME_ZONE */;
+/*!40103 SET TIME_ZONE='+00:00' */;
+/*!40014 SET @OLD_UNIQUE_CHECKS=@@UNIQUE_CHECKS, UNIQUE_CHECKS=0 */;
+/*!40014 SET @OLD_FOREIGN_KEY_CHECKS=@@FOREIGN_KEY_CHECKS, FOREIGN_KEY_CHECKS=0 */;
+/*!40101 SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='NO_AUTO_VALUE_ON_ZERO' */;
+/*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
+
+--
+-- Table structure for table `appointments`
+--
+
+DROP TABLE IF EXISTS `appointments`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `appointments` (
+  `appointment_id` int NOT NULL AUTO_INCREMENT,
+  `doctor_id` int NOT NULL,
+  `patient_id` int NOT NULL,
+  `appointment_date` date NOT NULL,
+  `appointment_time` time NOT NULL,
+  `status` enum('Booked','Cancelled','Completed') DEFAULT 'Booked',
+  `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`appointment_id`),
+  UNIQUE KEY `uq_doctor_time` (`doctor_id`,`appointment_date`,`appointment_time`),
+  KEY `fk_app_patient` (`patient_id`),
+  CONSTRAINT `fk_app_doctor` FOREIGN KEY (`doctor_id`) REFERENCES `doctors` (`doctor_id`),
+  CONSTRAINT `fk_app_patient` FOREIGN KEY (`patient_id`) REFERENCES `patients` (`patient_id`)
+) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `appointments`
+--
+
+LOCK TABLES `appointments` WRITE;
+/*!40000 ALTER TABLE `appointments` DISABLE KEYS */;
+INSERT INTO `appointments` VALUES (3,1,1,'2026-02-10','10:00:00','Booked','2026-02-07 06:38:36'),(4,3,6,'2026-02-28','10:00:00','Booked','2026-02-20 04:55:13');
+/*!40000 ALTER TABLE `appointments` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `doctor_availability`
+--
+
+DROP TABLE IF EXISTS `doctor_availability`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `doctor_availability` (
+  `availability_id` int NOT NULL AUTO_INCREMENT,
+  `doctor_id` int NOT NULL,
+  `doctor_name` varchar(50) NOT NULL,
+  `available_date` date NOT NULL,
+  `start_time` time NOT NULL,
+  `end_time` time NOT NULL,
+  `max_patients` int NOT NULL,
+  PRIMARY KEY (`availability_id`),
+  UNIQUE KEY `uq_doctor_slot` (`doctor_id`,`available_date`,`start_time`,`end_time`),
+  CONSTRAINT `fk_av_doctor` FOREIGN KEY (`doctor_id`) REFERENCES `doctors` (`doctor_id`) ON DELETE CASCADE,
+  CONSTRAINT `chl_time_valid` CHECK ((`start_time` < `end_time`))
+) ENGINE=InnoDB AUTO_INCREMENT=111 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `doctor_availability`
+--
+
+LOCK TABLES `doctor_availability` WRITE;
+/*!40000 ALTER TABLE `doctor_availability` DISABLE KEYS */;
+INSERT INTO `doctor_availability` VALUES (101,1,'Dr. Sudhir Sharma','2026-02-23','09:00:00','14:00:00',8),(102,2,'Dr. Roger Dsouza','2026-02-23','09:00:00','12:00:00',10),(103,3,'Dr. Sheetal Pal','2026-02-28','09:00:00','12:00:00',10),(104,4,'Dr. Rajdev Tiwari','2026-02-23','09:00:00','14:00:00',8),(105,5,'Dr. Manoj Mhatre','2026-03-02','11:00:00','17:00:00',10),(106,6,'Surgeon Pankaj Mishra','2026-03-04','07:30:00','12:00:00',15),(107,7,'Dr. Aman Khan','2026-03-05','09:00:00','14:00:00',10),(108,8,'Dr. Payal Jain','2026-03-05','11:00:00','19:00:00',20),(109,9,'Dr. Anjali Mehta','2026-03-09','07:30:00','13:00:00',15),(110,10,'Dr. Sneha Patil','2026-03-12','07:30:00','13:00:00',15);
+/*!40000 ALTER TABLE `doctor_availability` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `doctors`
+--
+
+DROP TABLE IF EXISTS `doctors`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `doctors` (
+  `doctor_id` int NOT NULL AUTO_INCREMENT,
+  `doctor_name` varchar(100) NOT NULL,
+  `specialization` varchar(100) NOT NULL,
+  `phone` varchar(20) NOT NULL,
+  `email` varchar(100) DEFAULT NULL,
+  `joining_date` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`doctor_id`),
+  UNIQUE KEY `phone` (`phone`),
+  UNIQUE KEY `email` (`email`)
+) ENGINE=InnoDB AUTO_INCREMENT=11 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `doctors`
+--
+
+LOCK TABLES `doctors` WRITE;
+/*!40000 ALTER TABLE `doctors` DISABLE KEYS */;
+INSERT INTO `doctors` VALUES (1,'Dr. Sudhir Sharma','General Physician','772564895','SSharma@gmail.com','2026-02-07 06:32:02'),(2,'Dr. Roger Dsouza','Orthopedic doctor','9891758265','dsouza@gmail.com','2022-10-01 02:02:00'),(3,'Dr. Sheetal Pal','Cardiologist','713984049','SheetalP@gmail.com','2020-05-15 04:30:00'),(4,'Dr. Rajdev Tiwari','General Physician','98934554129','PrajotTiwari@gmail.com','2020-05-29 02:00:06'),(5,'Dr. Manoj Mhatre','General Physician','7209180857','DMhatre@gmail.com','2018-05-10 02:00:00'),(6,'Surgeon Pankaj Mishra','Neuro-Surgeon','9960854240','HM@gmail.com','2018-11-10 06:18:00'),(7,'Dr. Aman Khan','ENT Specialist','9345678123','aman.khan@gmail.com','2022-08-25 03:30:00'),(8,'Dr. payal jain','Gynaecologist','9699925479','Payal2234@gmail.com','2021-06-12 03:30:00'),(9,'Dr. Anjali Mehta','Dermatologist','9123456789','anjali.mehta@gmail.com','2020-03-20 04:30:00'),(10,'Dr. Sneha Patil','General Physician','9012345678','sneha.patil@gmail.com','2023-01-12 02:45:00');
+/*!40000 ALTER TABLE `doctors` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `patients`
+--
+
+DROP TABLE IF EXISTS `patients`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `patients` (
+  `patient_id` int NOT NULL AUTO_INCREMENT,
+  `patient_name` varchar(100) NOT NULL,
+  `phone` varchar(15) NOT NULL,
+  `email` varchar(100) DEFAULT NULL,
+  `age` int DEFAULT NULL,
+  `Gender` varchar(20) DEFAULT NULL,
+  PRIMARY KEY (`patient_id`),
+  UNIQUE KEY `uq_patient_contact` (`phone`,`email`)
+) ENGINE=InnoDB AUTO_INCREMENT=8 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `patients`
+--
+
+LOCK TABLES `patients` WRITE;
+/*!40000 ALTER TABLE `patients` DISABLE KEYS */;
+INSERT INTO `patients` VALUES (1,'Amit Verma','8888888888',NULL,21,'Male'),(2,'Arpit Mishra','9892795409','amishra@gmail.com',19,'Male'),(3,'Irfan Maniyar','9899542639','IrfanM@gmail.com',20,'Male'),(4,'Kevin Mariam','7710964279','KevM@gmail.com',19,'Male'),(5,'Harshit Mishra','7208780667','Harshit2234@gmail.com',24,'Male'),(6,'Sudha Prajapati','8936542511','SP@gmail.com',31,'Female'),(7,'Anita Shah','9692145879','Anita785@gmail.com',29,'Female');
+/*!40000 ALTER TABLE `patients` ENABLE KEYS */;
+UNLOCK TABLES;
+/*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
+
+/*!40101 SET SQL_MODE=@OLD_SQL_MODE */;
+/*!40014 SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS */;
+/*!40014 SET UNIQUE_CHECKS=@OLD_UNIQUE_CHECKS */;
+/*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
+/*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
+/*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
+/*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
+
+show tables;
+
+select * from doctors;
+
+-- Dump completed on 2026-02-21  8:34:36
