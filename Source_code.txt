@@ -187,23 +187,26 @@ AND '11:00:00' BETWEEN da.start_time AND da.end_time
 
 -- Prevent exceeding max patients
 AND (
-    SELECT COUNT(*)
-    FROM appointments ap
-    WHERE ap.doctor_id = a.doctor_id
-    AND ap.appointment_date = '2026-03-10'
-    AND ap.appointment_id != a.appointment_id
+    SELECT COUNT(*) FROM (
+        SELECT *
+        FROM appointments ap
+        WHERE ap.doctor_id = a.doctor_id
+        AND ap.appointment_date = '2026-03-10'
+        AND ap.appointment_id != a.appointment_id
+    ) AS temp_count
 ) < da.max_patients
 
--- Prevent duplicate same time slot
+-- Prevent duplicate time slot
 AND NOT EXISTS (
-    SELECT 1
-    FROM appointments ap2
-    WHERE ap2.doctor_id = a.doctor_id
-    AND ap2.appointment_date = '2026-03-10'
-    AND ap2.appointment_time = '11:00:00'
-    AND ap2.appointment_id != a.appointment_id
+    SELECT 1 FROM (
+        SELECT *
+        FROM appointments ap2
+        WHERE ap2.doctor_id = a.doctor_id
+        AND ap2.appointment_date = '2026-03-10'
+        AND ap2.appointment_time = '11:00:00'
+        AND ap2.appointment_id != a.appointment_id
+    ) AS temp_dup
 );
-
 FOR CANCELLATION; 
  
 UPDATE appointments
@@ -250,6 +253,7 @@ SELECT
 FROM appointments a
 JOIN doctors d ON a.doctor_id = d.doctor_id
 JOIN patients p ON a.patient_id = p.patient_id;
+
 
 
 
