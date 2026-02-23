@@ -136,32 +136,32 @@ SELECT * FROM doctor_availability;
 The BOOKING operation must insert a transaction record and update the Appointments table in a single transaction. 
  
 START TRANSACTION; 
- 
-INSERT INTO appointments
+ INSERT INTO appointments
 (doctor_id, patient_id, appointment_date, appointment_time, status)
 SELECT 
-    1,
-    1,
-    '2026-03-10',
+    9,
+    7,
+    '2026-03-09',
     '10:00:00',
     'Booked'
 FROM doctor_availability da
-WHERE da.doctor_id = 1
-AND da.available_date = '2026-03-10'
+WHERE da.doctor_id = 9
+AND da.available_date = '2026-03-09'
 AND '10:00:00' BETWEEN da.start_time AND da.end_time
 AND (
     SELECT COUNT(*)
     FROM appointments a
-    WHERE a.doctor_id = 1
-    AND a.appointment_date = '2026-03-10'
+    WHERE a.doctor_id = 9
+    AND a.appointment_date = '2026-03-09'
 ) < da.max_patients
 AND NOT EXISTS (
     SELECT 1
     FROM appointments a2
-    WHERE a2.doctor_id = 1
-    AND a2.appointment_date = '2026-03-10'
+    WHERE a2.doctor_id = 9
+    AND a2.appointment_date = '2026-03-09'
     AND a2.appointment_time = '10:00:00'
 );
+
  
 Explanation: 
 If the doctor is available on the date, the time is in the range of duty and unique and if the slots for the day are left, only then the transaction is committed and changes are saved permanently. 
@@ -236,4 +236,5 @@ SELECT
 FROM appointments a
 JOIN doctors d ON a.doctor_id = d.doctor_id
 JOIN patients p ON a.patient_id = p.patient_id;
+
 
