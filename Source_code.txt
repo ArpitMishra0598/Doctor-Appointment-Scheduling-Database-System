@@ -169,7 +169,40 @@ If the doctor is available on the date, the time is in the range of duty and uni
  
  
  
-9.6 TRANSACTION MANAGEMENT (CANCELLING APPOINTMENT) 
+9.6 TRANSACTION MANAGEMENT (UPDATING/CANCELLING APPOINTMENT) 
+Before Updating the Appointment on a next date, the system needs to verify if the doctor is available on the same date. 
+ 
+START TRANSACTION; 
+ 
+UPDATE appointments a
+JOIN doctor_availability da
+ON da.doctor_id = a.doctor_id
+SET 
+    a.appointment_date = '2026-03-10',
+    a.appointment_time = '11:00:00',
+    a.status = 'Rescheduled'
+WHERE a.appointment_id = 1
+AND da.available_date = '2026-03-10'
+AND '11:00:00' BETWEEN da.start_time AND da.end_time
+
+-- Prevent exceeding max patients
+AND (
+    SELECT COUNT(*)
+    FROM appointments ap
+    WHERE ap.doctor_id = a.doctor_id
+    AND ap.appointment_date = '2026-03-10'
+    AND ap.appointment_id != a.appointment_id
+) < da.max_patients
+
+-- Prevent duplicate same time slot
+AND NOT EXISTS (
+    SELECT 1
+    FROM appointments ap2
+    WHERE ap2.doctor_id = a.doctor_id
+    AND ap2.appointment_date = '2026-03-10'
+    AND ap2.appointment_time = '11:00:00'
+    AND ap2.appointment_id != a.appointment_id
+);
 
 FOR CANCELLATION; 
  
@@ -217,6 +250,7 @@ SELECT
 FROM appointments a
 JOIN doctors d ON a.doctor_id = d.doctor_id
 JOIN patients p ON a.patient_id = p.patient_id;
+
 
 
 
